@@ -108,13 +108,18 @@ class LDAPManager:
                         try:
                             logger.debug(f"Attempting connection to {server.host}:{server.port}")
                             
+                            # Handle anonymous binding
+                            user = self.ad_config.bind_dn if self.ad_config.bind_dn else None
+                            password = self.ad_config.password if self.ad_config.password else None
+                            auth_method = ldap3.ANONYMOUS if not user else ldap3.SIMPLE
+                            
                             connection = Connection(
                                 server,
-                                user=self.ad_config.bind_dn,
-                                password=self.ad_config.password,
+                                user=user,
+                                password=password,
                                 auto_bind=self.ad_config.auto_bind,
                                 receive_timeout=self.ad_config.receive_timeout,
-                                authentication=ldap3.SIMPLE,
+                                authentication=auth_method,
                                 check_names=True,
                                 raise_exceptions=True
                             )
